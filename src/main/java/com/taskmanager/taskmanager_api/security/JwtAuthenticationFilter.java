@@ -33,9 +33,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(authHeader==null || !authHeader.startsWith("Bearer"))
         {
             filterChain.doFilter(request,response);
+            return;
         }
         // 2. Extract JWT from Header
-        assert authHeader != null;
         String token=authHeader.substring(7);
         String email=jwtUtil.extractEmail(token);
 
