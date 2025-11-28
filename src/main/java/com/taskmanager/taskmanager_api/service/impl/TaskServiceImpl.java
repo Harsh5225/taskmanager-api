@@ -1,6 +1,7 @@
 package com.taskmanager.taskmanager_api.service.impl;
 
-
+import com.taskmanager.taskmanager_api.exception.ResourceNotFoundException;
+import com.taskmanager.taskmanager_api.exception.AccessDeniedException;
 import com.taskmanager.taskmanager_api.dto.TaskRequest;
 import com.taskmanager.taskmanager_api.model.Task;
 import com.taskmanager.taskmanager_api.model.User;
@@ -65,6 +66,55 @@ public class TaskServiceImpl implements TaskService {
 
 
     }
+
+    @Override
+    public Task updateTask(Long taskId, TaskRequest request){
+
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        String email=authentication.getName();
+        User user=userRepository.findByEmail(email)
+                .orElseThrow(()->new RuntimeException("User not found"));
+
+        // get task
+        Task task=taskRepository.findById(taskId)
+                .orElseThrow(()->new ResourceNotFoundException("Task not found."));
+
+        //update task
+        if(!task.getUser().getId().equals(user.getId())){
+            throw new AccessDeniedException("You are not allowed to update this task");
+        }
+
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setStatus(request.getStatus());
+        task.setDueDate(request.getDueDate());
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public void deleteTask(Long taskId){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+
+        String email=authentication.getName();
+
+        User user=userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("user not found"));
+
+        Task task=taskRepository.findById(taskId)
+                .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
+
+        // ownership check
+        if(!task.getUser().getId().equals(user.getId()))
+        {
+            throw new AccessDeniedException("You are not allowed to delete this task");
+
+        }
+
+        taskRepository.delete(task);
+    }
+
+
+
 }
 
 

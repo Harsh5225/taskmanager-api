@@ -9,4 +9,8 @@ import java.util.List;
 public interface TaskService {
     Task createTask(TaskRequest request);
     List<Task>getMyTasks();
+
+    Task updateTask(Long taskId, TaskRequest request);
+
+    void deleteTask(Long taskId);
 }
