@@ -1,9 +1,11 @@
 package com.taskmanager.taskmanager_api.controller;
 
 import com.taskmanager.taskmanager_api.dto.TaskRequest;
+import com.taskmanager.taskmanager_api.dto.TaskResponse;
 import com.taskmanager.taskmanager_api.model.Task;
 import com.taskmanager.taskmanager_api.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,18 +18,24 @@ public class TaskController {
 
     // create task
     @PostMapping
-    public Task createTask(@RequestBody TaskRequest request){
+    public TaskResponse createTask(@RequestBody TaskRequest request){
         return taskService.createTask(request);
     }
 
     @GetMapping
-    public List<Task> getMyTasks(){
-        return taskService.getMyTasks();
+    public Page<TaskResponse> getMyTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        return taskService.getMyTasks(page, size, sortBy, direction);
     }
 
 
+
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id,
+    public TaskResponse updateTask(@PathVariable Long id,
                            @RequestBody TaskRequest request){
         return taskService.updateTask(id, request);
     }
