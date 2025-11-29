@@ -1,5 +1,6 @@
 package com.taskmanager.taskmanager_api.service.impl;
 
+import com.taskmanager.taskmanager_api.dto.TaskResponse;
 import com.taskmanager.taskmanager_api.exception.ResourceNotFoundException;
 import com.taskmanager.taskmanager_api.exception.AccessDeniedException;
 import com.taskmanager.taskmanager_api.dto.TaskRequest;
@@ -9,6 +10,10 @@ import com.taskmanager.taskmanager_api.repository.TaskRepository;
 import com.taskmanager.taskmanager_api.repository.UserRepository;
 import com.taskmanager.taskmanager_api.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,7 +28,7 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
 
     @Override
-    public Task createTask(TaskRequest request){
+    public TaskResponse createTask(TaskRequest request){
 
         // 1. Get logged-in user's email from SecurityContext
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
@@ -46,29 +51,35 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         // 4. save Task
-        return taskRepository.save(task);
-
-    }
-
-    @Override
-    public List<Task>getMyTasks(){
-        // 1. Get logged-in user's email from SecurityContext
-        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
-        String email=authentication.getName();
-
-        // 2. Load user
-        User user=userRepository.findByEmail(email)
-                .orElseThrow(()->new RuntimeException("User not found."));
-
-        // 3. fetch only this user's tasks
-
-        return taskRepository.findByUser(user);
+        Task savedTask = taskRepository.save(task);
+        return mapToResponse(savedTask);
 
 
     }
 
     @Override
-    public Task updateTask(Long taskId, TaskRequest request){
+    public Page<TaskResponse> getMyTasks(int page, int size, String sortBy, String direction) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return taskRepository.findByUser(user, pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Override
+    public TaskResponse updateTask(Long taskId, TaskRequest request){
 
         Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
         String email=authentication.getName();
@@ -88,7 +99,9 @@ public class TaskServiceImpl implements TaskService {
         task.setDescription(request.getDescription());
         task.setStatus(request.getStatus());
         task.setDueDate(request.getDueDate());
-        return taskRepository.save(task);
+        Task updatedTask = taskRepository.save(task);
+        return mapToResponse(updatedTask);
+
     }
 
     @Override
@@ -113,6 +126,20 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.delete(task);
     }
 
+
+    private TaskResponse mapToResponse(Task task) {
+        return TaskResponse.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .status(task.getStatus())
+                .dueDate(task.getDueDate())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .userId(task.getUser().getId())
+                .userEmail(task.getUser().getEmail())
+                .build();
+    }
 
 
 }
