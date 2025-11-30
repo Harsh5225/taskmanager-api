@@ -6,6 +6,7 @@ import com.taskmanager.taskmanager_api.model.Task;
 import com.taskmanager.taskmanager_api.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,11 +18,13 @@ public class TaskController {
     private final TaskService taskService;
 
     // create task
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     public TaskResponse createTask(@RequestBody TaskRequest request){
         return taskService.createTask(request);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
     public Page<TaskResponse> getMyTasks(
             @RequestParam(defaultValue = "0") int page,
@@ -33,13 +36,14 @@ public class TaskController {
     }
 
 
-
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     public TaskResponse updateTask(@PathVariable Long id,
                            @RequestBody TaskRequest request){
         return taskService.updateTask(id, request);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     public String deleteTask(@PathVariable Long id){
         taskService.deleteTask(id);
