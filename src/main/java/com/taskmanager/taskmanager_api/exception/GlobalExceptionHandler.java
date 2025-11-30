@@ -1,5 +1,6 @@
 package com.taskmanager.taskmanager_api.exception;
 
+import org.springframework.security.access.AccessDeniedException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +26,27 @@ public class GlobalExceptionHandler {
 
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String,Object>>handleAccessDenied(AccessDeniedException ex){
-        Map<String,Object>error=new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("error",ex.getMessage());
 
-        return new ResponseEntity<>(error,HttpStatus.FORBIDDEN);
+    // I am  NOT handling Spring Security’s AccessDeniedException.
+    // it is likely importing using own custom AccessDeniedException (or none at all), while Spring Security throws:
+    // org.springframework.security.access.AccessDeniedException
+
+    //    Spring Security throws
+    //            → org.springframework.security.access.AccessDeniedException
+    //    Your handler expects
+    //→ com.taskmanager.taskmanager_api.exception.AccessDeniedException
+    //    Mismatch → your handler is SKIPPED
+    //    The exception falls into:   @ExceptionHandler(Exception.class)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("error", ex.getMessage());
+
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
+
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String,Object>>handleGeneral(Exception ex){
