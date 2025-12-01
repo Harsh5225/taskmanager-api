@@ -4,6 +4,7 @@ import com.taskmanager.taskmanager_api.model.RefreshToken;
 import com.taskmanager.taskmanager_api.model.User;
 import com.taskmanager.taskmanager_api.repository.RefreshTokenRepository;
 import com.taskmanager.taskmanager_api.service.RefreshTokenService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 
@@ -22,6 +24,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
+    @Transactional
     public RefreshToken createRefreshToken(User user) {
        // remove old refresh token if exists (1 token per user)
 

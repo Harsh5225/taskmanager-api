@@ -6,7 +6,6 @@ import com.taskmanager.taskmanager_api.dto.RegisterRequest;
 import com.taskmanager.taskmanager_api.model.RefreshToken;
 import com.taskmanager.taskmanager_api.model.Role;
 import com.taskmanager.taskmanager_api.model.User;
-import com.taskmanager.taskmanager_api.repository.RefreshTokenRepository;
 import com.taskmanager.taskmanager_api.repository.UserRepository;
 import com.taskmanager.taskmanager_api.security.JwtUtil;
 import com.taskmanager.taskmanager_api.service.AuthService;
