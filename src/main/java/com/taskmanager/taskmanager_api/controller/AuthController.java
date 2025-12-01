@@ -1,9 +1,11 @@
 package com.taskmanager.taskmanager_api.controller;
 
+import com.taskmanager.taskmanager_api.dto.AuthResponse;
 import com.taskmanager.taskmanager_api.dto.LoginRequest;
 import com.taskmanager.taskmanager_api.dto.RegisterRequest;
 import com.taskmanager.taskmanager_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,9 +23,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request){
-
-        return authService.login(request);
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+        return ResponseEntity.ok(authService.login(request));
     }
+
 
 }
