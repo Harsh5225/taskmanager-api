@@ -5,6 +5,7 @@ import com.taskmanager.taskmanager_api.exception.ResourceNotFoundException;
 import com.taskmanager.taskmanager_api.exception.AccessDeniedException;
 import com.taskmanager.taskmanager_api.dto.TaskRequest;
 import com.taskmanager.taskmanager_api.model.Task;
+import com.taskmanager.taskmanager_api.model.TaskStatus;
 import com.taskmanager.taskmanager_api.model.User;
 import com.taskmanager.taskmanager_api.repository.TaskRepository;
 import com.taskmanager.taskmanager_api.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -124,6 +126,41 @@ public class TaskServiceImpl implements TaskService {
         }
 
         taskRepository.delete(task);
+    }
+
+    @Override
+    public Page<TaskResponse>searchTasks(
+            TaskStatus status,
+            String keyword,
+            LocalDate from,
+            LocalDate to,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    ){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+
+        String email=authentication.getName();
+
+        User user=userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("user not found"));
+
+        Sort sort=direction.equalsIgnoreCase("desc")
+                ?Sort.by(sortBy).descending()
+                :Sort.by(sortBy).ascending();
+
+        Pageable pageable=PageRequest.of(page,size,sort);
+
+        return  taskRepository.searchTasks(
+                user,
+                status,
+                keyword,
+                from,
+                to,
+                pageable
+        ).map(this::mapToResponse);
+
     }
 
 

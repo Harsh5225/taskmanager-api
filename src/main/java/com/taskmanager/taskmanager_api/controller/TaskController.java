@@ -3,12 +3,15 @@ package com.taskmanager.taskmanager_api.controller;
 import com.taskmanager.taskmanager_api.dto.TaskRequest;
 import com.taskmanager.taskmanager_api.dto.TaskResponse;
 import com.taskmanager.taskmanager_api.model.Task;
+import com.taskmanager.taskmanager_api.model.TaskStatus;
 import com.taskmanager.taskmanager_api.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -48,5 +51,21 @@ public class TaskController {
     public String deleteTask(@PathVariable Long id){
         taskService.deleteTask(id);
         return "Task deleted successfully";
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('USER')")
+    public Page<TaskResponse>searchTasks(
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+            ){
+
+        return taskService.searchTasks(status, keyword, from, to, page, size, sortBy, direction);
     }
 }

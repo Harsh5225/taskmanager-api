@@ -48,13 +48,26 @@ public class GlobalExceptionHandler {
 
 
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String,Object>>handleGeneral(Exception ex){
-        Map<String,Object>error=new HashMap<>();
-        error.put("timeline",LocalDateTime.now());
-        error.put("error","something went wrong");
-        return new ResponseEntity<>(error,HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Map<String,Object>>handleGeneral(Exception ex){
+//        Map<String,Object>error=new HashMap<>();
+//        error.put("timeline",LocalDateTime.now());
+//        error.put("error","something went wrong");
+//        return new ResponseEntity<>(error,HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
+@ExceptionHandler(Exception.class)
+public ResponseEntity<Map<String,Object>> handleGeneral(Exception ex){
+    ex.printStackTrace(); // THIS LINE IS IMPORTANT
+
+    Map<String,Object> error = new HashMap<>();
+    error.put("timeline", LocalDateTime.now());
+    error.put("error", ex.getClass().getSimpleName());
+    error.put("message", ex.getMessage());
+
+    return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+}
+
+
 
 }
 
