@@ -1,14 +1,26 @@
-# Step 1: Use official Java 21 runtime
-FROM eclipse-temurin:21-jre
-
-# Step 2: Working directory
+# -------- BUILD STAGE --------
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-# Step 3: Copy JAR
-COPY target/taskmanager-api-0.0.1-SNAPSHOT.jar app.jar
+# Copy Maven wrapper & pom
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
-# Step 4: Expose port
+# Download dependencies
+RUN chmod +x mvnw
+RUN ./mvnw -B -q dependency:go-offline
+
+# Copy source and build jar
+COPY src src
+RUN ./mvnw clean package -DskipTests
+
+
+# -------- RUN STAGE --------
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+COPY --from=build /app/target/taskmanager-api-0.0.1-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
-
-# Step 5: Run Spring Boot
 ENTRYPOINT ["java", "-jar", "app.jar"]
