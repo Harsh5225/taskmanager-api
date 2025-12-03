@@ -69,5 +69,21 @@ public ResponseEntity<Map<String,Object>> handleGeneral(Exception ex){
 
 
 
+@ExceptionHandler(TooManyRequestsException.class)
+public ResponseEntity<Map<String,Object>> handleTooManyRequests(TooManyRequestsException ex){
+        Map<String,Object>error=new HashMap<>();
+            error.put("timestamp",LocalDateTime.now());
+            error.put("error",ex.getMessage());
+
+            return new ResponseEntity<>(error,HttpStatus.TOO_MANY_REQUESTS);
+}
+//    jab rate limit exceed hoga → ye handler chalega
+//    HTTP Status = 429
+//    Response clean rahega (no server crash)
+
+
+
+
+
 }
 
